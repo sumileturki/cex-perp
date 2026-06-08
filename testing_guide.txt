@@ -1,0 +1,204 @@
+================================================================================
+      CEX PERPETUAL FUTURES EXCHANGE - ARCHITECTURE & TESTING GUIDE
+================================================================================
+
+This guide describes the decoupled architecture flow and provides step-by-step 
+instructions along with JSON request bodies to test the entire application.
+
+--------------------------------------------------------------------------------
+1. ARCHITECTURE FLOW
+--------------------------------------------------------------------------------
+
+The application is split into three main parts:
+1. Express Backend: Receives user requests, validates them, and pushes them to Redis.
+2. In-Memory Matching Engine: Consumes user commands, performs margin validations,
+   matches orders, net positions, and handles liquidations in microsecond-speed.
+3. Background DB Writer: Consumes execution logs via Redis streams and writes
+   transactions to Postgres/Prisma asynchronously.
+
+[FLOW DIAGRAM]
+
+      +---------------------------------------------------+
+      |                  Express Backend                  |
+      +---------------------------------------------------+
+                               |
+                               | (Publish Command)
+                               v
+                       [ Redis Stream: engine-stream ]
+                               |
+                               | (Consume command)
+                               v
+      +---------------------------------------------------+
+      |             Matching Engine (In-Memory)           |
+      +---------------------------------------------------+
+      |   - In-memory Balances, Positions, and Markets    |
+      |   - Orderbook matching and Margin validation      |
+      +---------------------------------------------------+
+                               |
+                               | (Publish Database Event logs)
+                               v
+                      [ Redis Stream: db-write-stream ]
+                               |
+                               | (Consume Database Event logs)
+                               v
+      +---------------------------------------------------+
+      |             DB Writer (Async Background)          |
+      +---------------------------------------------------+
+                               |
+                               | (Atomic Transaction updates)
+                               v
+      +---------------------------------------------------+
+      |                  Postgres Database                |
+      +---------------------------------------------------+
+
+[EVENTS STREAMED]
+- BALANCE_ONRAMP: Updates user balances.
+- ORDER_CREATE: Persists active limit orders and updates locked balance.
+- TRADE_SETTLE: Net positions, updates available/locked balances, logs trade.
+- ORDER_CANCEL: Reverts locked order margins.
+- LIQUIDATE_FORCE_CLOSE: Closes bankrupt positions, updates available balance.
+- LIQUIDATE_CAP_BALANCE: Caps bankrupt available balance to 0 (bankruptcy protection).
+
+--------------------------------------------------------------------------------
+2. SETUP & STARTUP
+--------------------------------------------------------------------------------
+
+1. Reset and migrate the database schema:
+   $ bun x prisma db push
+
+2. Seed active trading markets (BTC_USDT, ETH_USDT, SOL_USDT):
+   $ bun x prisma db seed
+   (Or: bun x prisma db seed inside packages/db)
+
+3. Start backend server and matching engine worker concurrently:
+   $ bun run dev
+
+--------------------------------------------------------------------------------
+3. STEP-BY-STEP TESTING FLOW
+--------------------------------------------------------------------------------
+
+We will test matching by creating User A (Maker) and User B (Taker), depositing 
+collateral, executing a match where User A goes LONG and User B goes SHORT, and 
+simulating a liquidation.
+
+================================================================================
+STEP 3.1: REGISTER USER A (MAKER)
+POST http://localhost:3000/api/auth/registeruser
+Content-Type: application/json
+================================================================================
+{
+  "username": "user_maker",
+  "email": "maker@test.com",
+  "password": "password123"
+}
+--> Copy the "token" returned in the response for User A.
+
+
+================================================================================
+STEP 3.2: REGISTER USER B (TAKER)
+POST http://localhost:3000/api/auth/registeruser
+Content-Type: application/json
+================================================================================
+{
+  "username": "user_taker",
+  "email": "taker@test.com",
+  "password": "password123"
+}
+--> Copy the "token" returned in the response for User B.
+
+
+================================================================================
+STEP 3.3: DEPOSIT USDT FOR USER A (MAKER)
+POST http://localhost:3000/api/auth/onramp
+Headers:
+  Authorization: Bearer <USER_A_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "asset": "USDT",
+  "amount": 10000
+}
+
+
+================================================================================
+STEP 3.4: DEPOSIT USDT FOR USER B (TAKER)
+POST http://localhost:3000/api/auth/onramp
+Headers:
+  Authorization: Bearer <USER_B_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "asset": "USDT",
+  "amount": 10000
+}
+
+
+================================================================================
+STEP 3.5: GET ACTIVE MARKET ID
+GET http://localhost:3000/api/auth/markets
+Headers:
+  Authorization: Bearer <USER_A_TOKEN>
+================================================================================
+--> Copy the "id" value of the "BTC_USDT" market from the response list.
+
+
+================================================================================
+STEP 3.6: USER A PLACES LIMIT BUY (Going LONG)
+POST http://localhost:3000/api/v1/order
+Headers:
+  Authorization: Bearer <USER_A_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "marketId": "<BTC_USDT_MARKET_ID>",
+  "side": "BUY",
+  "type": "LIMIT",
+  "price": 50000,
+  "quantity": 0.5
+}
+--> In-Memory: locks (0.5 * 50000) / 10 = $2,500 of margin.
+--> In Postgres (after DB Writer processes): 
+    - Order is created with status "OPEN".
+    - User A Balance has available = $7,500, locked = $2,500.
+
+
+================================================================================
+STEP 3.7: USER B PLACES LIMIT SELL (Going SHORT - Matches Maker)
+POST http://localhost:3000/api/v1/order
+Headers:
+  Authorization: Bearer <USER_B_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "marketId": "<BTC_USDT_MARKET_ID>",
+  "side": "SELL",
+  "type": "LIMIT",
+  "price": 50000,
+  "quantity": 0.5
+}
+--> In-Memory: Instantly executes trade, net positions, releases locked order margins.
+--> In Postgres (after DB Writer processes):
+    - Trades table: logs a Trade record at price 50000, qty 0.5.
+    - Position table:
+      * User A: LONG position of size 0.5, entryPrice 50,000, margin 2,500.
+      * User B: SHORT position of size 0.5, entryPrice 50,000, margin 2,500.
+    - Balance table:
+      * User A: available = 7,500, locked = 2,500.
+      * User B: available = 7,500, locked = 2,500.
+
+--------------------------------------------------------------------------------
+4. VERIFYING POSTGRES TABLES (PRISMA STUDIO)
+--------------------------------------------------------------------------------
+
+You can launch Prisma Studio to visually inspect all table updates in real-time:
+$ bun x prisma studio
+
+Check the following:
+1. **Balance Table**: Available balances decrease, locked balances increase, and 
+   available is capped at 0 on bankruptcy.
+2. **Order Table**: Verify status is updated to "FILLED" or "CANCELLED" as matching
+   engine publishes events.
+3. **Trade Table**: Verify trade rows correspond to matched execution amounts.
+4. **Position Table**: Verify correct entryPrice, size, margin, and PositionSide 
+   are maintained per user/market.
+================================================================================

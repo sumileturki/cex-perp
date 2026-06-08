@@ -1,0 +1,1637 @@
+{
+  "info": {
+    "_postman_id": "8b08f498-8ad2-4a0f-ba0a-2007802fa9bc",
+    "name": "CEX Perp Exchange API - Full QA Suite",
+    "description": "Comprehensive collection of API requests to register, onramp, and place BUY/SELL orders for the End-to-End test suites.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Auth & Setup",
+      "item": [
+        {
+          "name": "Register User A (Maker)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.success && response.token) {",
+                  "    pm.collectionVariables.set(\"token_a\", response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"usera_maker\",\n  \"email\": \"usera@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/registeruser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registeruser"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register User B (Taker)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.success && response.token) {",
+                  "    pm.collectionVariables.set(\"token_b\", response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"userb_taker\",\n  \"email\": \"userb@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/registeruser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registeruser"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Register User C (FIFO Maker 2 / Liquidator)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.success && response.token) {",
+                  "    pm.collectionVariables.set(\"token_c\", response.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"userc_extra\",\n  \"email\": \"userc@test.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/registeruser",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "registeruser"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Onramp User A ($10,000 USDT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": \"USDT\",\n  \"amount\": 10000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/onramp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "onramp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Onramp User A (Extra $5,000 USDT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": \"USDT\",\n  \"amount\": 5000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/onramp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "onramp"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Onramp User B ($10,000 USDT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset\": \"USDT\",\n  \"amount\": 10000\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/onramp",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "onramp"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Happy Path Tests",
+      "item": [
+        {
+          "name": "1.3 Limit Buy Order (A BUY LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.4 Limit Sell Order (B SELL LIMIT 0.2 @ 60,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 60000,\n  \"quantity\": 0.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.5 Trade Execution (B SELL LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.7 Position Closing (A SELL LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Order (DELETE /order)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"REPLACE_WITH_ORDER_ID\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.8 Partial Fills - Part 1 (A BUY LIMIT 1.0 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "1.8 Partial Fills - Part 2 (B SELL LIMIT 0.4 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Matching Engine Tests",
+      "item": [
+        {
+          "name": "2.2 Buy does not match higher ask (B BUY LIMIT 0.1 @ 49,900)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 49900,\n  \"quantity\": 0.1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.3 Sell does not match lower bid (B SELL LIMIT 0.1 @ 50,100)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50100,\n  \"quantity\": 0.1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Multiple Price Levels - Setup Ask 1 (A SELL LIMIT 0.1 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Multiple Price Levels - Setup Ask 2 (A SELL LIMIT 0.2 @ 50,100)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50100,\n  \"quantity\": 0.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.4 Multiple Price Levels - Taker Buy (B BUY LIMIT 0.3 @ 50,200)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50200,\n  \"quantity\": 0.3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 FIFO - Setup Bid 1 (A BUY LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 FIFO - Setup Bid 2 (C BUY LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_c}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.5 FIFO - Taker Sell (B SELL LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.6 Partial Matching - Setup Sell (A SELL LIMIT 0.2 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.6 Partial Matching - Taker Buy (B BUY LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.7 Large Sweep - Setup Ask 1 (A SELL LIMIT 0.2 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.7 Large Sweep - Setup Ask 2 (A SELL LIMIT 0.3 @ 50,100)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50100,\n  \"quantity\": 0.3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.7 Large Sweep - Setup Ask 3 (A SELL LIMIT 0.5 @ 50,200)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50200,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2.7 Large Sweep - Taker Buy (B BUY LIMIT 1.2 @ 50,300)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50300,\n  \"quantity\": 1.2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Margin & Position Tests",
+      "item": [
+        {
+          "name": "3.1 Sufficient Margin (A BUY LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.2 Insufficient Margin (A BUY LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3.3 Margin Locking (A BUY LIMIT 0.8 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.8\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.3 Increase LONG (A BUY LIMIT 0.5 @ 60,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 60000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.4 Increase SHORT (B SELL LIMIT 0.5 @ 40,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 40000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.5 Reduce LONG (A SELL LIMIT 0.4 @ 55,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 55000,\n  \"quantity\": 0.4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.6 Reduce SHORT (B BUY LIMIT 0.4 @ 45,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 45000,\n  \"quantity\": 0.4\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4.8 Reverse Position (A SELL LIMIT 0.5 @ 50,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. PnL Tests",
+      "item": [
+        {
+          "name": "5.1 LONG Profit Settlement (A SELL LIMIT 1.0 @ 55,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 55000,\n  \"quantity\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.2 LONG Loss Settlement (A SELL LIMIT 1.0 @ 45,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"SELL\",\n  \"type\": \"LIMIT\",\n  \"price\": 45000,\n  \"quantity\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.3 SHORT Profit Settlement (B BUY LIMIT 1.0 @ 45,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 45000,\n  \"quantity\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "5.4 SHORT Loss Settlement (B BUY LIMIT 1.0 @ 55,000)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_b}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 55000,\n  \"quantity\": 1.0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Failure Tests",
+      "item": [
+        {
+          "name": "11.6 Invalid Order Rejection (Negative Price)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": -100,\n  \"quantity\": 0.5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "11.6 Invalid Order Rejection (Zero Qty)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token_a}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marketId\": \"{{market_id}}\",\n  \"side\": \"BUY\",\n  \"type\": \"LIMIT\",\n  \"price\": 50000,\n  \"quantity\": 0\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/order",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "order"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "market_id",
+      "value": "REPLACE_WITH_BTC_USDT_MARKET_ID",
+      "type": "string"
+    },
+    {
+      "key": "token_a",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_b",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_c",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

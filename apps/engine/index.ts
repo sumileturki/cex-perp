@@ -1,17 +1,17 @@
 import { startWorker } from "./src/redis/streamWorker";
-import { state } from "./src/state";
-
-console.log("Starting engine worker...");
+import { startDBWriter } from "./src/redis/dbWriter";
 
 async function bootstrap() {
-  await state.initialize();
-  await startWorker();
+  await Promise.all([
+    startWorker(),
+    startDBWriter(),
+  ]);
 }
 
 bootstrap()
   .then(() => {
-    console.log("Worker loop ended.");
+    console.log("Engine and DB Writer loops ended.");
   })
   .catch((err) => {
-    console.error("Fatal worker error:", err);
+    console.error("Fatal engine / worker error:", err);
   });

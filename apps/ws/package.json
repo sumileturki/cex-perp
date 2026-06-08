@@ -1,0 +1,13 @@
+{
+  "name": "ws-server",
+  "version": "1.0.0",
+  "main": "server.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch server.ts",
+    "binance": "bun binance.ts"
+  },
+  "dependencies": {
+    "redis": "^4.7.0"
+  }
+}

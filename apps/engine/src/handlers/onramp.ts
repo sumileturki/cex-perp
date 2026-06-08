@@ -1,44 +1,27 @@
-import { prisma } from "db";
+import { redis } from "../redis/redis";
+import { getOrCreateMemoryBalance } from "../memoryState";
 
-export async function handleOnRamp(
-  data: Record<string, string>
-) {
+export async function handleOnRamp(data: Record<string, string>) {
   const userId = data.userId;
   const asset = data.asset;
   const amountStr = data.amount;
 
   if (!userId || !asset || !amountStr) {
-    console.error("Invalid onramp data: missing parameters", data);
     return;
   }
 
   const amount = Number(amountStr);
   if (isNaN(amount)) {
-    console.error("Invalid amount:", amountStr);
     return;
   }
 
-  await prisma.balance.upsert({
-    where: {
-      userId_asset: {
-        userId,
-        asset,
-      },
-    },
-    update: {
-      available: {
-        increment: amount,
-      },
-    },
-    create: {
-      userId,
-      asset,
-      available: amount,
-      locked: 0,
-    },
-  });
+  const balance = getOrCreateMemoryBalance(userId, asset);
+  balance.available += amount;
 
-  console.log(
-    `Balance credited: ${amount} ${asset}`
-  );
+  await redis.xAdd("db-write-stream", "*", {
+    type: "BALANCE_ONRAMP",
+    userId,
+    asset,
+    amount: amount.toString(),
+  });
 }

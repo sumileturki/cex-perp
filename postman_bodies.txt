@@ -1,0 +1,126 @@
+================================================================================
+          CEX PERPETUAL EXCHANGE - FULL APPLICATION TESTING GUIDE
+================================================================================
+
+This guide walks you through testing the entire application end-to-end,
+including user registration, login, onramping USDT, order matching, position
+netting, trade logging, and liquidations.
+
+--------------------------------------------------------------------------------
+STEP 1: PREPARE THE DATABASE AND RUN THE APP
+--------------------------------------------------------------------------------
+1. Apply the schema updates (Position, Trade, and Order.margin) to your database:
+   $ bun x prisma db push
+
+2. Seed the database with the default markets (BTC_USDT, SOL_USDT, ETH_USDT):
+   $ bun x prisma db seed
+   (Or run: bun x prisma db seed in packages/db)
+
+3. Start the backend and matching engine concurrently:
+   $ bun run dev
+
+--------------------------------------------------------------------------------
+STEP 2: TEST FLOW - USER A (MAKER) AND USER B (TAKER)
+--------------------------------------------------------------------------------
+
+We will test matching by creating User A (Maker) and User B (Taker), depositing
+collateral, and executing a trade where User A goes LONG and User B goes SHORT.
+
+================================================================================
+1. REGISTER USER A (MAKER)
+POST http://localhost:3000/api/auth/registeruser
+Headers: Content-Type: application/json
+================================================================================
+{
+  "username": "usera_maker",
+  "email": "usera@test.com",
+  "password": "password123"
+}
+--> Copy the "token" returned in the response for User A.
+
+
+================================================================================
+2. REGISTER USER B (TAKER)
+POST http://localhost:3000/api/auth/registeruser
+Headers: Content-Type: application/json
+================================================================================
+{
+  "username": "userb_taker",
+  "email": "userb@test.com",
+  "password": "password123"
+}
+--> Copy the "token" returned in the response for User B.
+
+
+================================================================================
+3. DEPOSIT USDT COLLATERAL FOR USER A
+POST http://localhost:3000/api/auth/onramp
+Headers:
+  Authorization: Bearer <USER_A_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "asset": "USDT",
+  "amount": 10000
+}
+
+
+================================================================================
+4. DEPOSIT USDT COLLATERAL FOR USER B
+POST http://localhost:3000/api/auth/onramp
+Headers:
+  Authorization: Bearer <USER_B_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "asset": "USDT",
+  "amount": 10000
+}
+
+
+================================================================================
+5. USER A PLACES A BUY LIMIT ORDER (Going LONG)
+POST http://localhost:3000/api/v1/order
+Headers:
+  Authorization: Bearer <USER_A_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "marketId": "REPLACE_WITH_BTC_USDT_MARKET_ID",
+  "side": "BUY",
+  "type": "LIMIT",
+  "price": 50000,
+  "quantity": 0.5
+}
+--> This locks (0.5 * 50000) / 10 = $2,500 of margin.
+--> User A's available balance is now $7,500, locked is $2,500.
+
+
+================================================================================
+6. USER B PLACES A SELL LIMIT ORDER (Matches User A, User B goes SHORT)
+POST http://localhost:3000/api/v1/order
+Headers:
+  Authorization: Bearer <USER_B_TOKEN>
+  Content-Type: application/json
+================================================================================
+{
+  "marketId": "REPLACE_WITH_BTC_USDT_MARKET_ID",
+  "side": "SELL",
+  "type": "LIMIT",
+  "price": 50000,
+  "quantity": 0.5
+}
+--> This will instantly trigger matching!
+--> Trade is logged, positions are created, and balances are settled.
+
+--------------------------------------------------------------------------------
+STEP 3: VERIFY IN POSTGRES / PRISMA STUDIO
+--------------------------------------------------------------------------------
+Run `bun x prisma studio` to inspect tables:
+1. **Trade Table**: Verify a Trade record exists at price $50,000, quantity 0.5, with buyer = User A and seller = User B.
+2. **Position Table**:
+   - User A has a LONG position of size 0.5, entryPrice 50,000, margin 2,500.
+   - User B has a SHORT position of size 0.5, entryPrice 50,000, margin 2,500.
+3. **Balance Table**:
+   - User A: available = 7,500, locked = 2,500.
+   - User B: available = 7,500, locked = 2,500.
